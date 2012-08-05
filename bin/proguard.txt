@@ -1,0 +1,9 @@
+# view res/layout/main.xml #generated:8
+-keep class net.votebrian.demo.gldemo.SurfaceView { <init>(...); }
+
+# view AndroidManifest.xml #generated:17
+-keep class net.votebrian.demo.gltemplate.GLDemoActivity { <init>(...); }
+
+# view AndroidManifest.xml #generated:12
+-keep class net.votebrian.demo.gltemplate.Global { <init>(...); }
+
