@@ -13,7 +13,7 @@ public class SurfaceView extends GLSurfaceView {
     public SurfaceView(Context context, AttributeSet atr) {
         super(context, atr);
 
-        setEGLContextClientVersion(2);
+        // setEGLContextClientVersion(2);
         setRenderer(new GLESRenderer(context));
 
         gbl = new Global();

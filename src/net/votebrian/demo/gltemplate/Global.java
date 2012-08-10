@@ -1,9 +1,16 @@
 package net.votebrian.demo.gltemplate;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import android.app.Application;
 
 public class Global extends Application {
     private static int something = 0;
+    private Model mod1;
+
+    public Global() {
+        mod1 = new Model(0, 0, 0);
+    }
 
     public int getSomething() {
         return something;
@@ -11,5 +18,9 @@ public class Global extends Application {
 
     public void setSomething(int num) {
         something = num;
+    }
+
+    public void draw(GL10 gl) {
+        mod1.draw(gl);
     }
 }
