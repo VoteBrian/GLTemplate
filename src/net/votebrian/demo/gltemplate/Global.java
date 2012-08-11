@@ -9,7 +9,7 @@ public class Global extends Application {
     private Model mod1;
 
     public Global() {
-        mod1 = new Model(0, 0, -6);
+        mod1 = new Model(0, 0, -6, this);
     }
 
     public int getSomething() {
@@ -30,5 +30,9 @@ public class Global extends Application {
 
     public void setYAngle(float angle) {
         mod1.setYAngle(angle);
+    }
+
+    public void loadTexture(GL10 gl) {
+        mod1.loadTexture(gl);
     }
 }

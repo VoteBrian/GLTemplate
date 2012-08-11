@@ -36,6 +36,7 @@ class GLESRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         setDisplayProperties(gl);
         initLighting(gl);
+        gbl.loadTexture(gl);
     }
 
     public void onDrawFrame(GL10 gl) {

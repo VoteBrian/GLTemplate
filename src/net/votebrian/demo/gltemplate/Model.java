@@ -2,14 +2,23 @@ package net.votebrian.demo.gltemplate;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import java.io.InputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.opengl.GLUtils;
+
 public class Model {
     private static int VERTEX_PER_TRIANGLE = 3;
     private static int BYTES_PER_VERTEX = 4;
+
+    private Context mCtx;
 
     private int mCentX;
     private int mCentY;
@@ -20,11 +29,15 @@ public class Model {
 
     // Buffers
     private ByteBuffer mVbb;
-    private ByteBuffer mTriangles;
     private ByteBuffer mNbb;
+    private ByteBuffer mTbb;
 
     private FloatBuffer mVertexBuffer;
     private FloatBuffer mNormalBuffer;
+    private FloatBuffer mTextureBuffer;
+
+    private int[] mTextures = new int[3];
+    private Bitmap mBitmap;
 
     private float[] mVertices = {
         -0.5f,  0.5f,  0.5f,
@@ -132,26 +145,63 @@ public class Model {
     };
     private int mNumNormals = mNormals.length;
 
-    private byte[] mIndices = {
-        0, 1, 2,
-        0, 2, 3,
-        4, 0, 3,
-        4, 3, 7,
-        7, 3, 2,
-        7, 2, 6,
-        6, 2, 1,
-        6, 1, 5,
-        5, 1, 0,
-        5, 0, 4
-    };
-    private int mNumIndices = mIndices.length;
+    private float[] mTexCoordinates = {
+        0.25f, 1.00f,
+        0.25f, 0.75f,
+        0.50f, 0.75f,
 
-    public Model(int centX, int centY, int centZ) {
+        0.25f, 1.00f,
+        0.50f, 0.75f,
+        0.50f, 1.00f,
+
+        0.25f, 0.25f,
+        0.25f, 0.00f,
+        0.50f, 0.00f,
+
+        0.25f, 0.25f,
+        0.50f, 0.00f,
+        0.50f, 0.25f,
+
+        0.75f, 0.75f,
+        0.50f, 0.75f,
+        0.50f, 0.50f,
+
+        0.75f, 0.75f,
+        0.50f, 0.50f,
+        0.75f, 0.50f,
+
+        0.50f, 0.50f,
+        0.50f, 0.75f,
+        0.25f, 0.75f,
+
+        0.50f, 0.50f,
+        0.25f, 0.75f,
+        0.25f, 0.75f,
+
+        0.00f, 0.50f,
+        0.25f, 0.50f,
+        0.25f, 0.75f,
+
+        0.00f, 0.50f,
+        0.25f, 0.75f,
+        0.00f, 0.75f,
+
+        0.50f, 0.25f,
+        0.50f, 0.50f,
+        0.25f, 0.50f,
+
+        0.50f, 0.25f,
+        0.25f, 0.50f,
+        0.25f, 0.25f
+    };
+    private int mNumTexCoordinates = mTexCoordinates.length;
+
+    public Model(int centX, int centY, int centZ, Context context) {
         mCentX = centX;
         mCentY = centY;
         mCentZ = centZ;
 
-        buildBuffers();
+        mCtx = context;
     }
 
     private void buildBuffers() {
@@ -161,22 +211,55 @@ public class Model {
         mVertexBuffer.put(mVertices);
         mVertexBuffer.position(0);
 
-        mTriangles = ByteBuffer.allocateDirect(mNumIndices);
-        mTriangles.put(mIndices);
-        mTriangles.position(0);
-
         mNbb = ByteBuffer.allocateDirect(mNumNormals * VERTEX_PER_TRIANGLE * BYTES_PER_VERTEX);
         mNbb.order(ByteOrder.nativeOrder());
         mNormalBuffer = mNbb.asFloatBuffer();
         mNormalBuffer.put(mNormals);
         mNormalBuffer.position(0);
+
+        mTbb = ByteBuffer.allocateDirect(mNumTexCoordinates * VERTEX_PER_TRIANGLE * BYTES_PER_VERTEX);
+        mTbb.order(ByteOrder.nativeOrder());
+        mTextureBuffer = mTbb.asFloatBuffer();
+        mTextureBuffer.put(mTexCoordinates);
+        mTextureBuffer.position(0);
+    }
+
+    public void loadTexture(GL10 gl) {
+        InputStream is = mCtx.getResources().openRawResource(R.drawable.squares);
+        mBitmap = null;
+
+        try {
+            mBitmap = BitmapFactory.decodeStream(is);
+        } finally {
+            try {
+                is.close();
+                is = null;
+            } catch (IOException e) {
+                is = null;
+            }
+        }
+
+        gl.glGenTextures(3, mTextures, 0);
+
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[0]);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+
+        buildBuffers();
     }
 
     public void draw(GL10 gl) {
         gl.glPushMatrix();
 
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[0]);
+
         gl.glNormalPointer(GL10.GL_FLOAT, 0, mNormalBuffer);
         gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
+
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertexBuffer);
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
