@@ -9,7 +9,7 @@ public class Global extends Application {
     private Model mod1;
 
     public Global() {
-        mod1 = new Model(0, 0, 0);
+        mod1 = new Model(0, 0, -6);
     }
 
     public int getSomething() {
@@ -22,5 +22,13 @@ public class Global extends Application {
 
     public void draw(GL10 gl) {
         mod1.draw(gl);
+    }
+
+    public void setXAngle(float angle) {
+        mod1.setXAngle(angle);
+    }
+
+    public void setYAngle(float angle) {
+        mod1.setYAngle(angle);
     }
 }
