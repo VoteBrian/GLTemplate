@@ -14,6 +14,7 @@ import android.util.Log;
 
 class GLESRenderer implements GLSurfaceView.Renderer {
     Global gbl;
+    Context mCtx;
 
     private int mViewW = 0;
     private int mViewH = 0;
@@ -30,6 +31,7 @@ class GLESRenderer implements GLSurfaceView.Renderer {
     public final int SS_SUNLIGHT = GL10.GL_LIGHT0;
 
     public GLESRenderer(Context context) {
+        mCtx = context;
         gbl = (Global) context.getApplicationContext();
     }
 
@@ -54,6 +56,8 @@ class GLESRenderer implements GLSurfaceView.Renderer {
             gl.glClearColor(0.8f, 1.0f, 0.8f, 1.0f);
         }
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+
+        getBlendFunction(gl);
 
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glLoadIdentity();
@@ -92,11 +96,13 @@ class GLESRenderer implements GLSurfaceView.Renderer {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
         gl.glFrontFace(GL10.GL_CCW);
-        // gl.glCullFace(GL10.GL_BACK);
+        gl.glCullFace(GL10.GL_BACK);
 
         gl.glClearDepthf(1.0f);
         gl.glEnable(GL10.GL_DEPTH_TEST);
         gl.glDepthFunc(GL10.GL_LEQUAL);
+
+        getBlendFunction(gl);
 
         gl.glDisable(GL10.GL_COLOR_MATERIAL);
     }
@@ -121,5 +127,43 @@ class GLESRenderer implements GLSurfaceView.Renderer {
         gl.glShadeModel(GL10.GL_SMOOTH);
         gl.glEnable(GL10.GL_LIGHTING);
         gl.glEnable(SS_SUNLIGHT);
+    }
+
+    private void getBlendFunction(GL10 gl) {
+        // gl.glDisable(GL10.GL_BLEND);
+        gl.glEnable(GL10.GL_BLEND);
+
+        switch(gbl.getBlendFunction()) {
+            case 0:
+                gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 1:
+                gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 2:
+                gl.glBlendFunc(GL10.GL_SRC_COLOR, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 3:
+                gl.glBlendFunc(GL10.GL_ONE_MINUS_SRC_COLOR, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 4:
+                gl.glBlendFunc(GL10.GL_DST_COLOR, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 5:
+                gl.glBlendFunc(GL10.GL_ONE_MINUS_DST_COLOR, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 6:
+                gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 7:
+                gl.glBlendFunc(GL10.GL_ONE_MINUS_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 8:
+                gl.glBlendFunc(GL10.GL_DST_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 9:
+                gl.glBlendFunc(GL10.GL_ONE_MINUS_DST_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+                break;
+        }
     }
 }

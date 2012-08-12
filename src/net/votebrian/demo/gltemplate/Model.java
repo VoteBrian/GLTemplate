@@ -36,8 +36,11 @@ public class Model {
     private FloatBuffer mNormalBuffer;
     private FloatBuffer mTextureBuffer;
 
-    private int[] mTextures = new int[3];
+    private int[] mTextures = new int[2];
     private Bitmap mBitmap;
+    private Bitmap mBitmap2;
+
+    private int mTexEnvMode = 0;
 
     private float[] mVertices = {
         -0.5f,  0.5f,  0.5f,      // Front
@@ -239,12 +242,37 @@ public class Model {
             }
         }
 
-        gl.glGenTextures(3, mTextures, 0);
+        is = mCtx.getResources().openRawResource(R.drawable.overlay);
+        mBitmap2 = null;
+
+        try {
+            mBitmap2 = BitmapFactory.decodeStream(is);
+        } finally {
+            try {
+                is.close();
+                is = null;
+            } catch (IOException e) {
+                is = null;
+            }
+        }
+
+        gl.glGenTextures(2, mTextures, 0);
 
         gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[0]);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+
+
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[1]);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap2, 0);
+
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
+
+        mBitmap.recycle();
+        mBitmap2.recycle();
 
         buildBuffers();
     }
@@ -252,24 +280,51 @@ public class Model {
     public void draw(GL10 gl) {
         gl.glPushMatrix();
 
-        gl.glEnable(GL10.GL_TEXTURE_2D);
+        // TEXTURE 0
+        gl.glClientActiveTexture(GL10.GL_TEXTURE0);
+        gl.glActiveTexture(GL10.GL_TEXTURE0);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[0]);
+        gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
 
+        // TEXTURE 1
+        gl.glClientActiveTexture(GL10.GL_TEXTURE1);
+        gl.glActiveTexture(GL10.GL_TEXTURE1);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[1]);
+        setTextureEnvMode(gl);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+
+
+        // NORMALS
         gl.glNormalPointer(GL10.GL_FLOAT, 0, mNormalBuffer);
         gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
 
-        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
+        // VERTICES
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertexBuffer);
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 
+
+        // TRANSLATION/ROTATION
         gl.glTranslatef(mCentX, mCentY, mCentZ);
 
         gl.glRotatef(mXAngle, 0f, 1f, 0f);
         gl.glRotatef(mYAngle, 1f, 0f, 0f);
 
+
+        // DRAW
         gl.glDrawArrays(GL10.GL_TRIANGLES, 0, mNumVertices);
+
+        gl.glActiveTexture(GL10.GL_TEXTURE1);
+        gl.glDisable(GL10.GL_TEXTURE_2D);
+
+        gl.glClientActiveTexture(GL10.GL_TEXTURE0);
+        gl.glActiveTexture(GL10.GL_TEXTURE0);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
 
         gl.glPopMatrix();
     }
@@ -280,5 +335,38 @@ public class Model {
 
     public void setYAngle(float angle) {
         mYAngle += angle;
+    }
+
+    public void setBlendFunction(int pos) {
+
+    }
+
+    public void reset() {
+        mXAngle = 0;
+        mYAngle = 0;
+    }
+
+    private void setTextureEnvMode(GL10 gl) {
+        switch(mTexEnvMode) {
+            case 0:
+                gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_ADD);
+                break;
+            case 1:
+                gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_BLEND);
+                break;
+            case 3:
+                gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_DECAL);
+                break;
+            case 4:
+                gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
+                break;
+            case 5:
+                gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_REPLACE);
+                break;
+        }
+    }
+
+    public void setTextureFunction(int pos) {
+        mTexEnvMode = pos;
     }
 }
