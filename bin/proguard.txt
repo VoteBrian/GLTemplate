@@ -1,7 +1,7 @@
-# view AndroidManifest.xml #generated:20
+# view AndroidManifest.xml #generated:17
 -keep class net.votebrian.demo.gltemplate.GLTemplateActivity { <init>(...); }
 
-# view AndroidManifest.xml #generated:15
+# view AndroidManifest.xml #generated:12
 -keep class net.votebrian.demo.gltemplate.Global { <init>(...); }
 
 # view res/layout/main.xml #generated:8
