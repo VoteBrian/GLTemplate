@@ -7,13 +7,11 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.util.Log;
 
 public class GLTemplateActivity extends Activity
 {

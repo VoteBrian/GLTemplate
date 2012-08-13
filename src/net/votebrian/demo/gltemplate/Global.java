@@ -3,7 +3,6 @@ package net.votebrian.demo.gltemplate;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.app.Application;
-import android.widget.Toast;
 
 public class Global extends Application {
     private static int something = 0;

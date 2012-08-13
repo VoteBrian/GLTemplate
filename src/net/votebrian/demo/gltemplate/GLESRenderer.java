@@ -10,7 +10,6 @@ import java.nio.FloatBuffer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
-import android.util.Log;
 
 class GLESRenderer implements GLSurfaceView.Renderer {
     Global gbl;

@@ -4,7 +4,6 @@ import android.util.AttributeSet;
 import android.content.Context;
 import android.view.MotionEvent;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLES20;
 
 public class SurfaceView extends GLSurfaceView {
 
@@ -16,7 +15,6 @@ public class SurfaceView extends GLSurfaceView {
     public SurfaceView(Context context, AttributeSet atr) {
         super(context, atr);
 
-        // setEGLContextClientVersion(2);
         setRenderer(new GLESRenderer(context));
 
         gbl = (Global) context.getApplicationContext();
